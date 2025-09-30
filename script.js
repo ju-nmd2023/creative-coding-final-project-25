@@ -4,10 +4,10 @@ let img,
   brightnessArray = [],
   angleArray = [];
 
-let amount = 3000;
+let amount = 5000;
 let particles = [amount];
 let frameCounter = 0;
-let updateRate = 15; // Update flow field every 5 frames
+let updateRate = 2; // Update flow field every 5 frames
 
 function preload() {
   // No preload needed for webcam
@@ -51,7 +51,7 @@ function calculateBrightness() {
     let r = imagePixelArray[i];
     let g = imagePixelArray[i + 1];
     let b = imagePixelArray[i + 2];
-    let avg = (r + g + b) / 3;
+    let avg = (r*0.299 + g*0.587 + b*0.114);
     brightnessArray[pixel] = map(avg, 0, 255, 0, 1);
     angleArray[pixel] = map(brightnessArray[pixel], 0, 1, 0, TWO_PI);
     pixel++;
