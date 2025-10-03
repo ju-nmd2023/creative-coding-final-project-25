@@ -6,11 +6,15 @@ let img,
   edgeArray = [],
   prevBrightnessArray = [];
 
-let amount = 15000;
+let amount = 20000;
 let particles = [amount];
 let frameCounter = 0;
 let updateRate = 60; // Update flow field every 5 frames
 let globalDirection = 0; // Shared direction for all particles
+let offsetX, offsetY;
+
+let particleSlider, refreshSlider, directionSlider;
+let globalInfluenceValue;
 
 function preload() {
   // No preload needed for webcam
@@ -20,14 +24,57 @@ function setup() {
   img = createCapture(VIDEO);
   img.size(810, 540); // Reduce resolution for better performance
   img.hide(); // Hide the video element
+
+  colorMode(HSB, 360, 120, 100, 255);
+
+  particleSlider = createSlider(1000, 50000, 20000, 1000);
+  particleSlider.position(width/2, height/2 + img.height/2 + 20);
+  particleSlider.input(() => {
+    updateParticleAmount();
+  })
+
+  refreshSlider = createSlider(15, 90, 60, 5)
+  refreshSlider.position(width/2, height/2 + img.height/2 + 80)
+  refreshSlider.input(() => {
+    updateRate = refreshSlider.value();
+  })
+
+  directionSlider = createSlider(0, 3, 1, 0.2)
+  directionSlider.position(width/2, height/2 + img.height/2 + 140)
+  globalInfluenceValue = directionSlider.value();
+  directionSlider.input(() => {
+    globalInfluenceValue = directionSlider.value();
+  })
+  
   background(0);
+  
+  offsetX = (width - img.width) / 2;
+  offsetY = (height - img.height) / 2;
   for (let i = 0; i < amount; i++) {
+    
     var loc = createVector(random(img.width), random(height), 1);
     var angle = 0;
     var dir = createVector(cos(angle), sin(angle));
     var speed = random(0.5, 2);
     particles[i] = new Particle(loc, dir, speed);
   }
+}
+
+function updateParticleAmount(){
+
+
+  amount = particleSlider.value();
+  particles = [];
+
+  for (let i = 0; i < amount; i++) {
+    
+    var loc = createVector(random(img.width), random(height), 1);
+    var angle = 0;
+    var dir = createVector(cos(angle), sin(angle));
+    var speed = random(0.5, 2);
+    particles[i] = new Particle(loc, dir, speed);
+  }
+
 }
 
 function draw() {
@@ -52,6 +99,11 @@ function draw() {
   fill(0, 100);
   noStroke();
   rect(0, 0, width, height);
+  fill(255);
+  text('Particles: ' + particles.length, width/2, height/2 + img.height/2+20);
+  text('Refresh Rate: ' + updateRate, width/2, height/2 + img.height/2+80);
+  text('Particle Acceleration: ' + globalInfluenceValue, width/2, height/2 + img.height/2+140);
+  
   for (let i = 0; i < particles.length; i++) {
     particles[i].run();
   }
@@ -144,7 +196,7 @@ class Particle {
     this.accelerationDecay = 0.9;
     this.d = 2;
     this.globalDir = createVector(0, 0);
-    this.globalInfluence = 1; // How much the global direction affects this particle
+    this.globalInfluence = globalInfluenceValue; // How much the global direction affects this particle
     this.globalDecay = 0.95; // How quickly global influence fades
   }
 
@@ -177,12 +229,12 @@ class Particle {
     // Set the global direction for this particle
     this.globalDir.x = cos(angle);
     this.globalDir.y = sin(angle);
-    this.globalInfluence = 1; // Reset influence to maximum
+    this.globalInfluence = globalInfluenceValue; // Reset influence to maximum
   }
 
   applyRandomAcceleration() {
     // Add random burst of acceleration when frame updates
-    this.acceleration += random(2, 6);
+    this.acceleration += random(4, 10);
   }
 
   updateAcceleration() {
@@ -216,7 +268,17 @@ class Particle {
     }
   }
   update() {
-    fill(255);
-    ellipse(this.loc.x, this.loc.y, this.loc.z);
+    let angle = angleArray[floor(this.loc.x) + floor(this.loc.y) * img.width];
+    let hue = map(angle, 0, TWO_PI, 0, 160);
+    fill(hue, 60, 100, 100)
+    ellipse(this.loc.x + offsetX, this.loc.y + offsetY, this.loc.z);
   }
+
+   
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+  offsetX = (width - img.width) / 2;
+  offsetY = (height - img.height) / 2;
 }
