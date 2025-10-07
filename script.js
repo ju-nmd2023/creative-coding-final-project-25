@@ -12,6 +12,11 @@ let frameCounter = 0;
 let updateRate = 60; // Update flow field every 5 frames
 let globalDirection = 0; // Shared direction for all particles
 let offsetX, offsetY;
+let synth;
+let reverb;
+
+let harmonicityEffector = 0.5;
+
 
 let particleSlider, refreshSlider, directionSlider;
 let globalInfluenceValue;
@@ -19,7 +24,49 @@ let globalInfluenceValue;
 function preload() {
   // No preload needed for webcam
 }
+
+function updateReverbSettings(){
+reverb = new Tone.Reverb({
+    decay: 12,
+    wet: 0.4,
+    preDelay: 0.1
+  }).toDestination();
+
+  // Create FM synth for richer bass tones
+  synth = new Tone.FMSynth({
+    harmonicity: harmonicityEffector,
+    modulationIndex: 2,
+    oscillator: {
+      type: "sine"
+    },
+    envelope: {
+      attack: 0.3,
+      decay: 0.8,
+      sustain: 0.2,
+      release: 2
+    },
+    modulation: {
+      type: "sine"
+    },
+    modulationEnvelope: {
+      attack: 0.2,
+      decay: 0.3,
+      sustain: 0.1,
+      release: 1
+    },
+    volume: 10  // Increase volume (default is -10dB)
+  });
+
+  // Connect synth to reverb after both are created
+  synth.connect(reverb);
+
+}
 function setup() {
+  Tone.start();
+  
+  updateReverbSettings();
+  // Create reverb effect first
+  
   createCanvas(innerWidth, innerHeight);
   img = createCapture(VIDEO);
   img.size(810, 540); // Reduce resolution for better performance
@@ -37,6 +84,7 @@ function setup() {
   refreshSlider.position(width/2, height/2 + img.height/2 + 80)
   refreshSlider.input(() => {
     updateRate = refreshSlider.value();
+    
   })
 
   directionSlider = createSlider(0, 3, 1, 0.2)
@@ -44,6 +92,8 @@ function setup() {
   globalInfluenceValue = directionSlider.value();
   directionSlider.input(() => {
     globalInfluenceValue = directionSlider.value();
+    harmonicityEffector = map(globalInfluenceValue, 0, 3, 1, 0.3);
+    updateReverbSettings();
   })
   
   background(0);
@@ -82,6 +132,7 @@ function draw() {
 
   // Only update the flow field every 'updateRate' frames to prevent lag
   if (frameCounter % updateRate === 0) {
+    synth.triggerAttackRelease("C3", "8n");
     img.loadPixels();
     imagePixelArray = img.pixels;
     calculateBrightness();
