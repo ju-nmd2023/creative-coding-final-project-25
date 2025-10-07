@@ -18,7 +18,9 @@ let reverb;
 let harmonicityEffector = 0.5;
 
 
+
 let particleSlider, refreshSlider, directionSlider;
+let colorModeCheckbox = 0; // 0 = HSB, 1 = RGB
 let globalInfluenceValue;
 
 function preload() {
@@ -73,6 +75,9 @@ function setup() {
   img.hide(); // Hide the video element
 
   colorMode(HSB, 360, 120, 100, 255);
+
+  colorModeCheckbox = createCheckbox('Color Mode', false);
+  colorModeCheckbox.position(width/2 - 100, height/2 + img.height/2 + 140);
 
   particleSlider = createSlider(1000, 50000, 20000, 1000);
   particleSlider.position(width/2, height/2 + img.height/2 + 20);
@@ -151,13 +156,18 @@ function draw() {
   noStroke();
   rect(0, 0, width, height);
   fill(255);
+  textAlign(CENTER);
+  text('Color Mode', width/2 - 200, height/2 + img.height/2 + 140);
   text('Particles: ' + particles.length, width/2, height/2 + img.height/2+20);
   text('Refresh Rate: ' + updateRate, width/2, height/2 + img.height/2+80);
   text('Particle Acceleration: ' + globalInfluenceValue, width/2, height/2 + img.height/2+140);
   
-  for (let i = 0; i < particles.length; i++) {
-    particles[i].run();
-  }
+  
+    for (let i = 0; i < particles.length; i++) {
+      particles[i].run();
+    }
+  
+  
 }
 
 function calculateBrightness() {
@@ -319,9 +329,15 @@ class Particle {
     }
   }
   update() {
-    let angle = angleArray[floor(this.loc.x) + floor(this.loc.y) * img.width];
-    let hue = map(angle, 0, TWO_PI, 0, 160);
-    fill(hue, 60, 100, 100)
+    if (colorModeCheckbox.checked()) {
+      let angle = angleArray[floor(this.loc.x) + floor(this.loc.y) * img.width];
+      let hue = map(angle, 0, TWO_PI, 0, 160);
+      fill(hue, 60, 100, 100);
+    }
+    else{
+      fill(0,0,100);
+    }
+    
     ellipse(this.loc.x + offsetX, this.loc.y + offsetY, this.loc.z);
   }
 
