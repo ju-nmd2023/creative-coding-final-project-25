@@ -14,6 +14,10 @@ let globalDirection = 0; // Shared direction for all particles
 let offsetX, offsetY;
 let synth;
 let reverb;
+let ambientOscillator;
+let ambientOscillator2;
+let ambientNoise;
+let ambientLFO;
 
 let harmonicityEffector = 0.5;
 
@@ -33,6 +37,9 @@ function preload() {
 }
 
 function updateReverbSettings() {
+  if (reverb) reverb.dispose(); // Clean up old reverb
+  if (synth) synth.dispose(); // Clean up old synth
+
   reverb = new Tone.Reverb({
     decay: 12,
     wet: 0.4,
@@ -61,17 +68,79 @@ function updateReverbSettings() {
       sustain: 0.1,
       release: 1,
     },
-    volume: 10, // Increase volume (default is -10dB)
+    volume: 0, // Reduce volume to prevent clipping
   });
 
   // Connect synth to reverb after both are created
   synth.connect(reverb);
 }
+
+function createAmbientSound() {
+  // Create multiple low frequency oscillators for rumble effect
+  ambientOscillator = new Tone.Oscillator({
+    frequency: 40,
+    type: "sine",
+    volume: -15, // Reduce volume significantly to prevent crackling
+  });
+
+  ambientOscillator2 = new Tone.Oscillator({
+    frequency: 60,
+    type: "triangle",
+    volume: -18, // Reduce volume significantly
+  });
+
+  // Add filtered noise for texture
+  ambientNoise = new Tone.Noise({
+    type: "brown",
+    volume: -15, // Reduce noise volume to prevent crackling
+  });
+
+  // Create LFO for random frequency modulation with smoother settings
+  ambientLFO = new Tone.LFO({
+    frequency: 0.05, // Slower modulation to reduce rapid changes
+    min: 0.8, // Narrower range to prevent extreme frequency jumps
+    max: 1.2,
+    type: "sine",
+  });
+
+  // Create a very low lowpass filter for distant rumble effect
+  const lowpass = new Tone.Filter(100, "lowpass"); // Lower cutoff to reduce high frequencies
+  const lowpass2 = new Tone.Filter(60, "lowpass"); // Even lower second filter
+
+  // Chain the filters properly
+  lowpass.connect(lowpass2);
+  lowpass2.toDestination();
+
+  // Connect oscillators to first filter
+  ambientOscillator.connect(lowpass);
+  ambientOscillator2.connect(lowpass);
+  ambientNoise.connect(lowpass);
+
+  // Connect LFO to modulate frequency randomly
+  ambientLFO.connect(ambientOscillator.frequency);
+  ambientLFO.connect(ambientOscillator2.frequency);
+}
+
 function setup() {
-  Tone.start();
+  // Start Tone.js and all audio immediately
+  Tone.start().then(() => {
+    // Start oscillators immediately
+    ambientOscillator.start();
+    ambientOscillator2.start();
+    ambientNoise.start();
+    ambientLFO.start();
+
+    // Set up ambient sound modulation with smoother transitions
+    setInterval(() => {
+      // Use longer ramp times to prevent crackling from rapid frequency changes
+      ambientOscillator.frequency.rampTo(random(38, 45), random(4, 8));
+      ambientOscillator2.frequency.rampTo(random(58, 65), random(5, 10));
+      ambientLFO.frequency.rampTo(random(0.03, 0.08), random(2, 4)); // Smooth LFO changes
+    }, random(8000, 15000)); // Less frequent changes
+  });
 
   updateReverbSettings();
-  // Create reverb effect first
+  createAmbientSound();
 
   createCanvas(innerWidth, innerHeight);
   img = createCapture(VIDEO);
@@ -104,7 +173,7 @@ function setup() {
   offsetX = (width - img.width) / 2;
   offsetY = (height - img.height) / 2;
   for (let i = 0; i < amount; i++) {
-    var loc = createVector(random(img.width), random(height), 1);
+    var loc = createVector(random(img.width), random(img.height), 1);
     var angle = 0;
     var dir = createVector(cos(angle), sin(angle));
     var speed = random(0.5, 2);
@@ -130,7 +199,9 @@ function draw() {
 
   // Only update the flow field every 'updateRate' frames to prevent lag
   if (frameCounter % updateRate === 0) {
-    synth.triggerAttackRelease("C3", "8n");
+    if (synth) {
+      synth.triggerAttackRelease("C3", "8n");
+    }
     img.loadPixels();
     imagePixelArray = img.pixels;
     calculateBrightness();
@@ -328,6 +399,12 @@ class Particle {
 
     ellipse(this.loc.x + offsetX, this.loc.y + offsetY, this.loc.z);
   }
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+  offsetX = (width - img.width) / 2;
+  offsetY = (height - img.height) / 2;
 }
 
 function windowResized() {
