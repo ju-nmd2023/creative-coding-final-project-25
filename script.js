@@ -17,21 +17,22 @@ let reverb;
 
 let harmonicityEffector = 0.5;
 
-
-
 let particleSlider, refreshSlider, directionSlider;
 let colorModeCheckbox = 0; // 0 = HSB, 1 = RGB
 let globalInfluenceValue;
+
+let sliderWidth = 150;
+let halfSliderWidth = sliderWidth / 2;
 
 function preload() {
   // No preload needed for webcam
 }
 
-function updateReverbSettings(){
-reverb = new Tone.Reverb({
+function updateReverbSettings() {
+  reverb = new Tone.Reverb({
     decay: 12,
     wet: 0.4,
-    preDelay: 0.1
+    preDelay: 0.1,
   }).toDestination();
 
   // Create FM synth for richer bass tones
@@ -39,36 +40,35 @@ reverb = new Tone.Reverb({
     harmonicity: harmonicityEffector,
     modulationIndex: 2,
     oscillator: {
-      type: "sine"
+      type: "sine",
     },
     envelope: {
       attack: 0.3,
       decay: 0.8,
       sustain: 0.2,
-      release: 2
+      release: 2,
     },
     modulation: {
-      type: "sine"
+      type: "sine",
     },
     modulationEnvelope: {
       attack: 0.2,
       decay: 0.3,
       sustain: 0.1,
-      release: 1
+      release: 1,
     },
-    volume: 10  // Increase volume (default is -10dB)
+    volume: 10, // Increase volume (default is -10dB)
   });
 
   // Connect synth to reverb after both are created
   synth.connect(reverb);
-
 }
 function setup() {
   Tone.start();
-  
+
   updateReverbSettings();
   // Create reverb effect first
-  
+
   createCanvas(innerWidth, innerHeight);
   img = createCapture(VIDEO);
   img.size(810, 540); // Reduce resolution for better performance
@@ -76,37 +76,35 @@ function setup() {
 
   colorMode(HSB, 360, 120, 100, 255);
 
-  colorModeCheckbox = createCheckbox('Color Mode', false);
-  colorModeCheckbox.position(width/2 - 100, height/2 + img.height/2 + 140);
+  colorModeCheckbox = createCheckbox("", false);
+  colorModeCheckbox.position(width / 2 - img.width / 2 + sliderWidth * 1.75 * 2.75, height - 65);
 
   particleSlider = createSlider(1000, 50000, 20000, 1000);
-  particleSlider.position(width/2, height/2 + img.height/2 + 20);
+  particleSlider.position(width / 2 - img.width / 2, height - 80);
   particleSlider.input(() => {
     updateParticleAmount();
-  })
+  });
 
-  refreshSlider = createSlider(15, 90, 60, 5)
-  refreshSlider.position(width/2, height/2 + img.height/2 + 80)
+  refreshSlider = createSlider(15, 90, 60, 5);
+  refreshSlider.position(width / 2 - img.width / 2 + sliderWidth * 1.5, height - 80);
   refreshSlider.input(() => {
     updateRate = refreshSlider.value();
-    
-  })
+  });
 
-  directionSlider = createSlider(0, 3, 1, 0.2)
-  directionSlider.position(width/2, height/2 + img.height/2 + 140)
+  directionSlider = createSlider(0, 3, 1, 0.2);
+  directionSlider.position(width / 2 - img.width / 2 + sliderWidth * 1.5 * 2, height - 80);
   globalInfluenceValue = directionSlider.value();
   directionSlider.input(() => {
     globalInfluenceValue = directionSlider.value();
     harmonicityEffector = map(globalInfluenceValue, 0, 3, 1, 0.3);
     updateReverbSettings();
-  })
-  
+  });
+
   background(0);
-  
+
   offsetX = (width - img.width) / 2;
   offsetY = (height - img.height) / 2;
   for (let i = 0; i < amount; i++) {
-    
     var loc = createVector(random(img.width), random(height), 1);
     var angle = 0;
     var dir = createVector(cos(angle), sin(angle));
@@ -115,21 +113,17 @@ function setup() {
   }
 }
 
-function updateParticleAmount(){
-
-
+function updateParticleAmount() {
   amount = particleSlider.value();
   particles = [];
 
   for (let i = 0; i < amount; i++) {
-    
     var loc = createVector(random(img.width), random(height), 1);
     var angle = 0;
     var dir = createVector(cos(angle), sin(angle));
     var speed = random(0.5, 2);
     particles[i] = new Particle(loc, dir, speed);
   }
-
 }
 
 function draw() {
@@ -156,18 +150,14 @@ function draw() {
   noStroke();
   rect(0, 0, width, height);
   fill(255);
-  textAlign(CENTER);
-  text('Color Mode', width/2 - 200, height/2 + img.height/2 + 140);
-  text('Particles: ' + particles.length, width/2, height/2 + img.height/2+20);
-  text('Refresh Rate: ' + updateRate, width/2, height/2 + img.height/2+80);
-  text('Particle Acceleration: ' + globalInfluenceValue, width/2, height/2 + img.height/2+140);
-  
-  
-    for (let i = 0; i < particles.length; i++) {
-      particles[i].run();
-    }
-  
-  
+  text("Color Mode", width / 2 - img.width / 2 + sliderWidth * 1.5 * 3, height - 75);
+  text("Particles: " + particles.length, width / 2 - img.width / 2, height - 75);
+  text("Refresh Rate: " + updateRate, width / 2 - img.width / 2 + sliderWidth * 1.5, height - 75);
+  text("Particle Acceleration: " + globalInfluenceValue, width / 2 - img.width / 2 + sliderWidth * 1.5 * 2, height - 75);
+
+  for (let i = 0; i < particles.length; i++) {
+    particles[i].run();
+  }
 }
 
 function calculateBrightness() {
@@ -333,15 +323,12 @@ class Particle {
       let angle = angleArray[floor(this.loc.x) + floor(this.loc.y) * img.width];
       let hue = map(angle, 0, TWO_PI, 0, 160);
       fill(hue, 60, 100, 100);
+    } else {
+      fill(0, 0, 100);
     }
-    else{
-      fill(0,0,100);
-    }
-    
+
     ellipse(this.loc.x + offsetX, this.loc.y + offsetY, this.loc.z);
   }
-
-   
 }
 
 function windowResized() {
