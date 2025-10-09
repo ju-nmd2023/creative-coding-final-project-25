@@ -149,22 +149,19 @@ function setup() {
 
   colorMode(HSB, 360, 120, 100, 255);
 
-  colorModeCheckbox = createCheckbox("", false);
-  colorModeCheckbox.position(width / 2 - img.width / 2, height - 65);
-
   particleAmountSlider.addEventListener("input", () => {
     updateParticleAmount();
   });
 
   refreshRateSlider.addEventListener("input", () => {
-    updateRate = refreshRateSlider.value;
+    updateRate = map(refreshRateSlider.value, 15, 90, 90, 15);
   });
 
   globalInfluenceValue = influenceSlider.value;
 
   influenceSlider.addEventListener("input", () => {
     globalInfluenceValue = influenceSlider.value;
-    harmonicityEffector = map(globalInfluenceValue, 0, 0.5, 1, 0.3);
+    harmonicityEffector = map(globalInfluenceValue, 0, 3, 1, 0.3);
     updateReverbSettings();
   });
 
@@ -389,7 +386,7 @@ class Particle {
     }
   }
   update() {
-    if (colorModeCheckbox.checked()) {
+    if (colorModeCheckbox.checked) {
       let angle = angleArray[floor(this.loc.x) + floor(this.loc.y) * img.width];
       let hue = map(angle, 0, TWO_PI, 0, 160);
       fill(hue, 60, 100, 100);
