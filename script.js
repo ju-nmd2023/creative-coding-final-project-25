@@ -176,6 +176,12 @@ function setup() {
     var speed = random(0.5, 2);
     particles[i] = new Particle(loc, dir, speed);
   }
+
+  //let logo = createImg("./assets/sandboxLogo.png", "logo");
+  //logo.size(60, 60);
+  //logo.position(width / 2 - img.width / 2 - logo.width - 15, height / 2 - img.height / 2 - 15);
+  //logo.position(width / 2 - logo.width / 2 - 52, height - logo.height - 22);
+  fill(255);
 }
 
 function updateParticleAmount() {
@@ -216,11 +222,6 @@ function draw() {
   fill(0, 100);
   noStroke();
   rect(0, 0, width, height);
-  fill(255);
-  text("Color Mode", width / 2 - img.width / 2, height - 75);
-  text("Particles: " + particles.length, width / 2 - img.width / 2 + sliderWidth, height - 75);
-  text("Refresh Rate: " + updateRate, width / 2 - img.width / 2 + sliderWidth * 1.5 * 1.75, height - 75);
-  text("Particle Acceleration: " + globalInfluenceValue, width / 2 - img.width / 2 + sliderWidth * 1.75 * 2.5, height - 75);
 
   for (let i = 0; i < particles.length; i++) {
     particles[i].run();

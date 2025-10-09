@@ -2,6 +2,10 @@
   margin: 0;
   padding: 0;
 }
+html,
+body {
+  overflow: hidden;
+}
 
 @import url("https://fonts.googleapis.com/css2?family=Cutive+Mono&display=swap");
 
@@ -128,4 +132,25 @@ input[type="checkbox"] {
 label {
   color: white;
   font-family: "Cutive Mono", monospace;
+}
+
+.infoContainer {
+  position: absolute;
+  bottom: 0px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-family: "Cutive Mono", monospace;
+  font-size: 14px;
+  display: flex;
+}
+
+.infoContainer img {
+  width: 60px;
+  height: auto;
+  margin-right: 10px;
+}
+
+.nameContainer {
+  margin-top: 14px;
 }
