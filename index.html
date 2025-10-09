@@ -7,8 +7,33 @@
     <script src="https://unpkg.com/tone"></script>
     <script src="https://unpkg.com/ml5@1/dist/ml5.min.js"></script>
     <script src="./p5.min.js"></script>
-    <script src="./script.js"></script>
+    <script src="./script.js" defer></script>
+    <script src="./dropdown.js" defer></script>
     <link rel="stylesheet" href="./style.css" />
   </head>
-  <body></body>
+  <body>
+    <button class="dropDownButton">
+      <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sliders-horizontal-icon lucide-sliders-horizontal">
+        <path d="M10 5H3" />
+        <path d="M12 19H3" />
+        <path d="M14 3v4" />
+        <path d="M16 17v4" />
+        <path d="M21 12h-9" />
+        <path d="M21 19h-5" />
+        <path d="M21 5h-7" />
+        <path d="M8 10v4" />
+        <path d="M8 12H3" />
+      </svg>
+    </button>
+    <div class="sliderDropDownContainer">
+      <label for="particleAmount">Particle Amount:</label>
+      <input type="range" min="1000" max="50000" value="17000" step="1000" class="slider" id="particleAmount" />
+      <label for="influenceSlider">Acceleration:</label>
+      <input type="range" min="0" max="3" value="0.1" step="0.2" class="slider" id="influenceSlider" />
+      <label for="refreshRate">Refresh Rate:</label>
+      <input type="range" min="15" max="90" value="60" step="5" class="slider" id="refreshRate" />
+      <label for="colorMode">Color Mode:</label>
+      <input type="checkbox" id="colorMode" name="colorMode" value="colorMode" />
+    </div>
+  </body>
 </html>

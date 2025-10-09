@@ -17,12 +17,16 @@ let reverb;
 
 let harmonicityEffector = 0.5;
 
-let particleSlider, refreshSlider, directionSlider;
-let colorModeCheckbox = 0; // 0 = HSB, 1 = RGB
+let directionSlider;
 let globalInfluenceValue;
 
 let sliderWidth = 150;
 let halfSliderWidth = sliderWidth / 2;
+
+let particleAmountSlider = document.getElementById("particleAmount");
+let influenceSlider = document.getElementById("influenceSlider");
+let refreshRateSlider = document.getElementById("refreshRate");
+let colorModeCheckbox = document.getElementById("colorMode");
 
 function preload() {
   // No preload needed for webcam
@@ -77,26 +81,21 @@ function setup() {
   colorMode(HSB, 360, 120, 100, 255);
 
   colorModeCheckbox = createCheckbox("", false);
-  colorModeCheckbox.position(width / 2 - img.width / 2 + sliderWidth * 1.75 * 2.75, height - 65);
+  colorModeCheckbox.position(width / 2 - img.width / 2, height - 65);
 
-  particleSlider = createSlider(1000, 50000, 20000, 1000);
-  particleSlider.position(width / 2 - img.width / 2, height - 80);
-  particleSlider.input(() => {
+  particleAmountSlider.addEventListener("input", () => {
     updateParticleAmount();
   });
 
-  refreshSlider = createSlider(15, 90, 60, 5);
-  refreshSlider.position(width / 2 - img.width / 2 + sliderWidth * 1.5, height - 80);
-  refreshSlider.input(() => {
-    updateRate = refreshSlider.value();
+  refreshRateSlider.addEventListener("input", () => {
+    updateRate = refreshRateSlider.value;
   });
 
-  directionSlider = createSlider(0, 3, 1, 0.2);
-  directionSlider.position(width / 2 - img.width / 2 + sliderWidth * 1.5 * 2, height - 80);
-  globalInfluenceValue = directionSlider.value();
-  directionSlider.input(() => {
-    globalInfluenceValue = directionSlider.value();
-    harmonicityEffector = map(globalInfluenceValue, 0, 3, 1, 0.3);
+  globalInfluenceValue = influenceSlider.value;
+
+  influenceSlider.addEventListener("input", () => {
+    globalInfluenceValue = influenceSlider.value;
+    harmonicityEffector = map(globalInfluenceValue, 0, 0.5, 1, 0.3);
     updateReverbSettings();
   });
 
@@ -114,7 +113,7 @@ function setup() {
 }
 
 function updateParticleAmount() {
-  amount = particleSlider.value();
+  amount = particleAmountSlider.value;
   particles = [];
 
   for (let i = 0; i < amount; i++) {
@@ -150,10 +149,10 @@ function draw() {
   noStroke();
   rect(0, 0, width, height);
   fill(255);
-  text("Color Mode", width / 2 - img.width / 2 + sliderWidth * 1.5 * 3, height - 75);
-  text("Particles: " + particles.length, width / 2 - img.width / 2, height - 75);
-  text("Refresh Rate: " + updateRate, width / 2 - img.width / 2 + sliderWidth * 1.5, height - 75);
-  text("Particle Acceleration: " + globalInfluenceValue, width / 2 - img.width / 2 + sliderWidth * 1.5 * 2, height - 75);
+  text("Color Mode", width / 2 - img.width / 2, height - 75);
+  text("Particles: " + particles.length, width / 2 - img.width / 2 + sliderWidth, height - 75);
+  text("Refresh Rate: " + updateRate, width / 2 - img.width / 2 + sliderWidth * 1.5 * 1.75, height - 75);
+  text("Particle Acceleration: " + globalInfluenceValue, width / 2 - img.width / 2 + sliderWidth * 1.75 * 2.5, height - 75);
 
   for (let i = 0; i < particles.length; i++) {
     particles[i].run();
