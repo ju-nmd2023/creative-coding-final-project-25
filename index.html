@@ -32,14 +32,27 @@
       <input type="range" min="0" max="3" value="0.1" step="0.2" class="slider" id="influenceSlider" />
       <label for="refreshRate">Refresh Rate:</label>
       <input type="range" min="15" max="90" value="60" step="5" class="slider" id="refreshRate" />
-      <label for="colorMode">Color Mode:</label>
-      <input type="checkbox" id="colorMode" name="colorMode" value="colorMode" />
+      <div class="radioButtonContainer">
+      <label class="colorModeLabelTitle">Color Mode:</label>
+      <div class="colorMode1Container">
+        <input type="radio" id="colorMode1" name="colorMode" value="blackAndWhite" checked />
+        <label class="colorModeLabel" for="colorMode1">Black/White</label>
+      </div>
+      <div class="colorMode2Container">
+        <input type="radio" id="colorMode2" name="colorMode" value="Angles" checked />
+        <label class="colorModeLabel" for="colorMode2">Angles</label>
+      </div>
+      <div class="colorMode3Container">
+        <input type="radio" id="colorMode3" name="colorMode" value="speedBased" />
+        <label class="colorModeLabel" for="colorMode3">Velocity Based</label>
+      </div>
+      </div>
     </div>
     <div class="infoContainer">
       <img src="./assets/sandboxLogo.png" alt="" srcset="" />
       <div class="nameContainer">
-        <p>Malte Lindberg</p>
-        <p>Erik Hansen</p>
+        <a href="https://maltelindberg.se/" target="_blank">Malte Lindberg</a>
+        <a href="https://erikanton.myportfolio.com/" target="_blank">Erik Hansen</a>
       </div>
     </div>
   </body>

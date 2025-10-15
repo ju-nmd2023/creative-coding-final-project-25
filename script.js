@@ -30,7 +30,9 @@ let halfSliderWidth = sliderWidth / 2;
 let particleAmountSlider = document.getElementById("particleAmount");
 let influenceSlider = document.getElementById("influenceSlider");
 let refreshRateSlider = document.getElementById("refreshRate");
-let colorModeCheckbox = document.getElementById("colorMode");
+let colorMode1 = document.getElementById("colorMode1");
+let colorMode2 = document.getElementById("colorMode2");
+let colorMode3 = document.getElementById("colorMode3");
 
 function preload() {
   // No preload needed for webcam
@@ -387,12 +389,18 @@ class Particle {
     }
   }
   update() {
-    if (colorModeCheckbox.checked) {
+    if (colorMode2.checked) {
       let angle = angleArray[floor(this.loc.x) + floor(this.loc.y) * img.width];
       let hue = map(angle, 0, TWO_PI, 0, 160);
       fill(hue, 60, 100, 100);
-    } else {
-      fill(0, 0, 100);
+    } else if (colorMode3.checked) {
+      let speedIntensity = map(this.speed, this.baseSpeed, this.baseSpeed + 10, 0, 1);
+      let saturation = map(speedIntensity, 0, 0.5, 0, 100);
+      let alpha = map(speedIntensity, 0, 1, 150, 255); 
+      fill(0, saturation, 100, alpha);
+    }
+    else if (colorMode1.checked) {
+      fill(255, 150);
     }
 
     ellipse(this.loc.x + offsetX, this.loc.y + offsetY, this.loc.z);
