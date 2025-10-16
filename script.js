@@ -33,6 +33,7 @@ let refreshRateSlider = document.getElementById("refreshRate");
 let colorMode1 = document.getElementById("colorMode1");
 let colorMode2 = document.getElementById("colorMode2");
 let colorMode3 = document.getElementById("colorMode3");
+let colorMode4 = document.getElementById("colorMode4");
 
 function preload() {
   // No preload needed for webcam
@@ -396,10 +397,13 @@ class Particle {
     } else if (colorMode3.checked) {
       let speedIntensity = map(this.speed, this.baseSpeed, this.baseSpeed + 10, 0, 1);
       let saturation = map(speedIntensity, 0, 0.5, 0, 100);
-      let alpha = map(speedIntensity, 0, 1, 150, 255); 
+      let alpha = map(speedIntensity, 0, 1, 150, 255);
       fill(0, saturation, 100, alpha);
-    }
-    else if (colorMode1.checked) {
+    } else if (colorMode1.checked) {
+      fill(255, 150);
+    } else if (colorMode4.checked) {
+      fill(90, 100, 100, 100);
+    } else {
       fill(255, 150);
     }
 
