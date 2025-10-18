@@ -3,7 +3,6 @@ let img,
   brightness,
   brightnessArray = [],
   angleArray = [],
-  edgeArray = [],
   prevBrightnessArray = [];
 
 let amount = 20000;
@@ -21,11 +20,7 @@ let ambientLFO;
 
 let harmonicityEffector = 0.5;
 
-let directionSlider;
 let globalInfluenceValue;
-
-let sliderWidth = 150;
-let halfSliderWidth = sliderWidth / 2;
 
 let particleAmountSlider = document.getElementById("particleAmount");
 let influenceSlider = document.getElementById("influenceSlider");
@@ -174,8 +169,7 @@ function setup() {
   offsetY = (height - img.height) / 2;
   for (let i = 0; i < amount; i++) {
     var loc = createVector(random(img.width), random(img.height), 1);
-    var angle = 0;
-    var dir = createVector(cos(angle), sin(angle));
+    var dir = createVector(cos(0), sin(0));
     var speed = random(0.5, 2);
     particles[i] = new Particle(loc, dir, speed);
   }
@@ -241,15 +235,14 @@ function calculateBrightness() {
     let g = imagePixelArray[i + 1];
     let b = imagePixelArray[i + 2];
 
-    // Weighted brightness calculation (human eye sensitivity)
+    // To get more accurate brightness calculations, we used the luminance formula (option 1) like a users suggestion on a stackoverflow forum https://stackoverflow.com/questions/596216/formula-to-determine-perceived-brightness-of-rgb-color
     let brightness = r * 0.299 + g * 0.587 + b * 0.114;
     brightnessArray[pixel] = brightness / 255;
 
-    // Calculate edge strength using Sobel operator
+    // Sobel Operator was added  ontop of our original edge detection system by Github Copilot to enhance edge detection in the flow field
     let edgeStrength = calculateSobelEdge(pixel);
-    edgeArray[pixel] = edgeStrength;
 
-    // Motion detection
+    // Motion detection was added by Github Copilot to improve particle movement based on changes in brightness 
     let motionStrength = 0;
     if (prevBrightnessArray[pixel] !== undefined) {
       motionStrength = abs(brightnessArray[pixel] - prevBrightnessArray[pixel]);
@@ -258,13 +251,14 @@ function calculateBrightness() {
     // Combine brightness, edges, and motion for angle calculation
     let combinedValue = brightnessArray[pixel] * 0.4 + edgeStrength * 0.4 + motionStrength * 0.2;
 
-    // Create more dynamic angles based on combined factors
+    // Create more dynamic angles based on combined factors. Also added perlin noise for more organic flow.
     angleArray[pixel] = map(combinedValue, 0, 1, 0, TWO_PI * 3) + noise(pixel * 0.01, frameCounter * 0.01) * PI;
 
     pixel++;
   }
 }
 
+// Sobel Operator implementation for edge detection. This function was written with the help of Github Copilot.
 function calculateSobelEdge(pixelIndex) {
   let x = pixelIndex % img.width;
   let y = Math.floor(pixelIndex / img.width);
@@ -274,8 +268,6 @@ function calculateSobelEdge(pixelIndex) {
     return 0;
   }
 
-  // Sobel X kernel: [-1, 0, 1, -2, 0, 2, -1, 0, 1]
-  // Sobel Y kernel: [-1, -2, -1, 0, 0, 0, 1, 2, 1]
   let sobelX = 0;
   let sobelY = 0;
 
@@ -318,8 +310,8 @@ class Particle {
     this.accelerationDecay = 0.9;
     this.d = 2;
     this.globalDir = createVector(0, 0);
-    this.globalInfluence = globalInfluenceValue; // How much the global direction affects this particle
-    this.globalDecay = 0.95; // How quickly global influence fades
+    this.globalInfluence = globalInfluenceValue;
+    this.globalDecay = 0.95;
   }
 
   run() {
@@ -335,7 +327,7 @@ class Particle {
     // Blend flow field direction with global direction
     let flowDir = createVector(cos(angle), sin(angle));
 
-    // Mix the flow field direction with global direction based on influence
+    // Mix the flow field direction with global direction based on influence. These lerp functions were suggested by Github Copilot.
     this.dir.x = lerp(flowDir.x, this.globalDir.x, this.globalInfluence);
     this.dir.y = lerp(flowDir.y, this.globalDir.y, this.globalInfluence);
 
@@ -348,14 +340,14 @@ class Particle {
   }
 
   setGlobalDirection(angle) {
-    // Set the global direction for this particle
+    // Global direction code added by Github Copilot to make the particles move in the same direction when image is updated
     this.globalDir.x = cos(angle);
     this.globalDir.y = sin(angle);
     this.globalInfluence = globalInfluenceValue; // Reset influence to maximum
   }
 
   applyRandomAcceleration() {
-    // Add random burst of acceleration when frame updates
+    // Add random acceleration when video image updates
     this.acceleration += random(4, 10);
   }
 
@@ -372,6 +364,7 @@ class Particle {
     }
   }
   checkEdges() {
+    // Checks if particle is outside image bounds and resets position if so
     if (this.loc.x > img.width) {
       this.loc.x = random(img.width);
       this.loc.y = random(img.height);
@@ -390,6 +383,7 @@ class Particle {
     }
   }
   update() {
+    // Checks for different color modes for the particles
     if (colorMode2.checked) {
       let angle = angleArray[floor(this.loc.x) + floor(this.loc.y) * img.width];
       let hue = map(angle, 0, TWO_PI, 0, 160);
@@ -412,12 +406,7 @@ class Particle {
 }
 
 function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
-  offsetX = (width - img.width) / 2;
-  offsetY = (height - img.height) / 2;
-}
-
-function windowResized() {
+  // Make the canvas more responsive
   resizeCanvas(windowWidth, windowHeight);
   offsetX = (width - img.width) / 2;
   offsetY = (height - img.height) / 2;
