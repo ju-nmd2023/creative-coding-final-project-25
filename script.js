@@ -5,9 +5,9 @@ let img,
   angleArray = [],
   prevBrightnessArray = [];
 
-let amount = 20000;
-let particles = [amount];
-let frameCounter = 0;
+let amount = 20000; //Default amount of particles
+let particles = [amount]; //Particles array
+let frameCounter = 0; //Frame counter for updates
 let updateRate = 60; // Update flow field every 5 frames
 let globalDirection = 0; // Shared direction for all particles
 let offsetX, offsetY;
@@ -30,11 +30,8 @@ let colorMode2 = document.getElementById("colorMode2");
 let colorMode3 = document.getElementById("colorMode3");
 let colorMode4 = document.getElementById("colorMode4");
 
-function preload() {
-  // No preload needed for webcam
-}
 
-function updateReverbSettings() {
+function updateReverbSettings() { // Update reverb and synth settings based on influence
   if (reverb) reverb.dispose(); // Clean up old reverb
   if (synth) synth.dispose(); // Clean up old synth
 
@@ -73,24 +70,24 @@ function updateReverbSettings() {
   synth.connect(reverb);
 }
 
-function createAmbientSound() {
+function createAmbientSound() { //Ambient sound setup created partly with the help of copilot.
   // Create multiple low frequency oscillators for rumble effect
   ambientOscillator = new Tone.Oscillator({
     frequency: 40,
     type: "sine",
-    volume: -15, // Reduce volume significantly to prevent crackling
+    volume: -15, 
   });
 
   ambientOscillator2 = new Tone.Oscillator({
     frequency: 60,
     type: "triangle",
-    volume: -18, // Reduce volume significantly
+    volume: -18, 
   });
 
   // Add filtered noise for texture
   ambientNoise = new Tone.Noise({
     type: "brown",
-    volume: -15, // Reduce noise volume to prevent crackling
+    volume: -15, 
   });
 
   // Create LFO for random frequency modulation with smoother settings
@@ -130,11 +127,10 @@ function setup() {
 
     // Set up ambient sound modulation with smoother transitions
     setInterval(() => {
-      // Use longer ramp times to prevent crackling from rapid frequency changes
       ambientOscillator.frequency.rampTo(random(38, 45), random(4, 8));
       ambientOscillator2.frequency.rampTo(random(58, 65), random(5, 10));
-      ambientLFO.frequency.rampTo(random(0.03, 0.08), random(2, 4)); // Smooth LFO changes
-    }, random(8000, 15000)); // Less frequent changes
+      ambientLFO.frequency.rampTo(random(0.03, 0.08), random(2, 4)); 
+    }, random(8000, 15000)); 
   });
 
   updateReverbSettings();
@@ -147,16 +143,14 @@ function setup() {
 
   colorMode(HSB, 360, 120, 100, 255);
 
+  //Create Sliders
   particleAmountSlider.addEventListener("input", () => {
     updateParticleAmount();
   });
-
   refreshRateSlider.addEventListener("input", () => {
     updateRate = map(refreshRateSlider.value, 15, 90, 90, 15);
   });
-
   globalInfluenceValue = influenceSlider.value;
-
   influenceSlider.addEventListener("input", () => {
     globalInfluenceValue = influenceSlider.value;
     harmonicityEffector = map(globalInfluenceValue, 0, 3, 1, 0.3);
@@ -165,6 +159,7 @@ function setup() {
 
   background(0);
 
+  // Initialize particles and center offsets
   offsetX = (width - img.width) / 2;
   offsetY = (height - img.height) / 2;
   for (let i = 0; i < amount; i++) {
@@ -173,18 +168,15 @@ function setup() {
     var speed = random(0.5, 2);
     particles[i] = new Particle(loc, dir, speed);
   }
-
-  //let logo = createImg("./assets/sandboxLogo.png", "logo");
-  //logo.size(60, 60);
-  //logo.position(width / 2 - img.width / 2 - logo.width - 15, height / 2 - img.height / 2 - 15);
-  //logo.position(width / 2 - logo.width / 2 - 52, height - logo.height - 22);
   fill(255);
 }
 
+// Update particle amount based on slider
 function updateParticleAmount() {
   amount = particleAmountSlider.value;
   particles = [];
 
+  // Reinitialize particles with new amount
   for (let i = 0; i < amount; i++) {
     var loc = createVector(random(img.width), random(height), 1);
     var angle = 0;
@@ -197,11 +189,12 @@ function updateParticleAmount() {
 function draw() {
   frameCounter++;
 
-  // Only update the flow field every 'updateRate' frames to prevent lag
+  // Only update the flow field every 'updateRate' frame to prevent lag
   if (frameCounter % updateRate === 0) {
     if (synth) {
       synth.triggerAttackRelease("C3", "8n");
     }
+    //load image pixels and calculate brightness and angles
     img.loadPixels();
     imagePixelArray = img.pixels;
     calculateBrightness();
@@ -220,6 +213,7 @@ function draw() {
   noStroke();
   rect(0, 0, width, height);
 
+  // Update and draw all particles
   for (let i = 0; i < particles.length; i++) {
     particles[i].run();
   }
